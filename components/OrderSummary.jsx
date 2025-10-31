@@ -56,7 +56,7 @@ const OrderSummary = () => {
         return;
       }
 
-      let cartItemsArray = Object.keys(cartItems).map((key) => ({productId : key , quantity : cartItems[key]}));
+      let cartItemsArray = Object.keys(cartItems).map((key) => ({product : key , quantity : cartItems[key]}));
 
       cartItemsArray = cartItemsArray.filter(item => item.quantity > 0);
 
