@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
@@ -12,9 +12,28 @@ const AddProduct = () => {
   const [files, setFiles] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Earphone");
+  const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories from database
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get('/api/category/list');
+      if (data.success) {
+        setCategories(data.categories);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +53,7 @@ const AddProduct = () => {
     try {
       const token = await getToken();
       const { data } = await axios.post("/api/product/add", formData, {
-        header: {
+        headers: {
           Authorization: `Bearer ${token}`,
         },
       });
@@ -44,7 +63,7 @@ const AddProduct = () => {
         setFiles([]);
         setName("");
         setDescription("");
-        setCategory("Earphone");
+        setCategory("");
         setPrice("");
         setOfferPrice("");
       } else {
@@ -129,15 +148,15 @@ const AddProduct = () => {
               id="category"
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setCategory(e.target.value)}
-              defaultValue={category}
+              value={category}
+              required
             >
-              <option value="Earphone">Earphone</option>
-              <option value="Headphone">Headphone</option>
-              <option value="Watch">Watch</option>
-              <option value="Smartphone">Smartphone</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Camera">Camera</option>
-              <option value="Accessories">Accessories</option>
+              <option value="">Select category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex flex-col gap-1 w-32">
