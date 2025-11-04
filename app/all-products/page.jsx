@@ -29,9 +29,32 @@ const AllProducts = () => {
     }, []);
 
     const filteredProducts = useMemo(() => {
-        if (!selectedCategory) return products;
-        return products.filter((p) => p.category === selectedCategory);
-    }, [products, selectedCategory]);
+        // Step 1: filter by category (if selected)
+        const byCategory = selectedCategory
+            ? products.filter((p) => p.category === selectedCategory)
+            : products;
+
+        // Step 2: sort by price (UI selection)
+        if (!selectedPrice) return byCategory;
+
+        const getEffectivePrice = (p) => {
+            const hasOffer = typeof p.offerPrice === 'number' && !Number.isNaN(p.offerPrice);
+            const hasPrice = typeof p.price === 'number' && !Number.isNaN(p.price);
+            if (hasOffer) return p.offerPrice;
+            if (hasPrice) return p.price;
+            return 0;
+        };
+
+        const sorted = [...byCategory].sort((a, b) => {
+            const pa = getEffectivePrice(a);
+            const pb = getEffectivePrice(b);
+            if (selectedPrice === 'low_to_high') return pa - pb;
+            if (selectedPrice === 'high_to_low') return pb - pa;
+            return 0;
+        });
+
+        return sorted;
+    }, [products, selectedCategory, selectedPrice]);
 
     return (
         <>
